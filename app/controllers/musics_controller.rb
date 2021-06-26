@@ -1,5 +1,6 @@
 class MusicsController < ApplicationController
-  before_action :set_music, only: [:show, :update]
+  before_action :set_music, only: [:show, :update, :destroy]
+  before_action :verify_deleted_music, only: [:show, :update, :destroy]
   
   def index
     @musics = Music.all
@@ -20,6 +21,11 @@ class MusicsController < ApplicationController
     json_response(@music)
   end
 
+  def destroy
+    @music.update!(deleted: true)
+    json_response(@music)
+  end
+
   private 
 
   def music_params
@@ -28,6 +34,12 @@ class MusicsController < ApplicationController
 
   def set_music
     @music = Music.find(params[:id])
+  end
+
+  def verify_deleted_music
+    if @music.deleted
+      raise ActiveRecord::RecordNotFound.new(message = '', model = @music, primary_key = @music.id, id = @music.id)
+    end
   end
 
 end
