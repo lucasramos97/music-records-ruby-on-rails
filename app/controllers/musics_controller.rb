@@ -1,5 +1,5 @@
 class MusicsController < ApplicationController
-  before_action :set_music, only: [:show]
+  before_action :set_music, only: [:show, :update]
   
   def index
     @musics = Music.all
@@ -13,6 +13,11 @@ class MusicsController < ApplicationController
   def create
     @music = Music.create!(music_params)
     json_response(@music, :created)
+  end
+
+  def update
+    @music.update!(music_params)
+    json_response(@music)
   end
 
   private 
