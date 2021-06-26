@@ -10,10 +10,15 @@ class MusicsController < ApplicationController
     json_response(@music)
   end
 
+  def create
+    @music = Music.create!(music_params)
+    json_response(@music, :created)
+  end
+
   private 
 
   def music_params
-    params.permit(:title, :artist, :release_date, :duration)
+    params.permit(:title, :artist, :release_date, :duration, :number_views, :feat)
   end
 
   def set_music
