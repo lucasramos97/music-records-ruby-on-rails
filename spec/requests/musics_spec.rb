@@ -11,18 +11,34 @@ end
 
 RSpec.describe 'Musics API', type: :request do
   let!(:musics) { create_list(:music, 10) }
-  let(:music_not_deleted) { musics.select { |m| !m.deleted }.first }
+  let!(:deleted_musics) { create_list(:music, 10, deleted: true) }
+  let(:music_not_deleted) { musics.first }
   let(:music_not_deleted_id) { music_not_deleted.id }
-  let(:music_deleted) { musics.select { |m| m.deleted }.first }
+  let(:music_deleted) { deleted_musics.first }
   let(:music_minimal_attributes) { get_music }
 
   describe 'GET /musics' do
-    before { get '/musics' }
 
-    it 'returns musics' do
-      expect(json).not_to be_empty
-      expect(json.size).to eq(10)
-      expect(response).to have_http_status(200)
+    context 'no query strings' do
+      before { get '/musics' }
+
+      it 'returns musics' do
+        expect(json).not_to be_empty
+        expect(json['content'].size).to eq(5)
+        expect(json['total']).to eq(10)
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'with query strings' do
+      before { get '/musics?page=2&size=4' }
+
+      it 'returns musics' do
+        expect(json).not_to be_empty
+        expect(json['content'].size).to eq(4)
+        expect(json['total']).to eq(10)
+        expect(response).to have_http_status(200)
+      end
     end
   end
 

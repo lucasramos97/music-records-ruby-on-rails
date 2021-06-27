@@ -1,10 +1,12 @@
 class MusicsController < ApplicationController
+  include Paginable
+
   before_action :set_music, only: [:show, :update, :destroy]
   before_action :verify_deleted_music, only: [:show, :update, :destroy]
   
   def index
-    @musics = Music.all
-    json_response(@musics)
+    @musics = Music.where(deleted: false).order(artist: :asc, title: :asc).page(page).per(size)
+    json_response(paged_musics(@musics))
   end
 
   def show
