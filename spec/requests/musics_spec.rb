@@ -1,11 +1,20 @@
 require 'rails_helper'
 
+def get_music
+  { 
+    title: 'Title Test', 
+    artist: 'Artist Test', 
+    release_date: Date.current, 
+    duration: Time.current 
+  }
+end
+
 RSpec.describe 'Musics API', type: :request do
   let!(:musics) { create_list(:music, 10) }
   let(:music_not_deleted) { musics.select { |m| !m.deleted }.first }
+  let(:music_not_deleted_id) { music_not_deleted.id }
   let(:music_deleted) { musics.select { |m| m.deleted }.first }
-  let(:release_date) { Date.current }
-  let(:duration) { Time.current }
+  let(:music_minimal_attributes) { get_music }
 
   describe 'GET /musics' do
     before { get '/musics' }
@@ -18,10 +27,9 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'GET /musics/:id' do
+    before { get "/musics/#{music_not_deleted_id}" }
 
     context 'when music exists' do
-      before { get "/musics/#{music_not_deleted.id}" }
-
       it 'return music by id' do
         expect(json).not_to be_empty
         expect(json['id']).to eq(music_not_deleted.id)
@@ -30,42 +38,34 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when music not exists' do
-      before { get "/musics/#{100}" }
+      let(:music_not_deleted_id) { 100 }
 
       it 'return music by id' do
-        expect(json['message']).to eq("Music not found by id: #{100}")
+        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
         expect(response).to have_http_status(404)
       end
     end
 
     context 'when music is deleted' do
-      before { get "/musics/#{music_deleted.id}" }
+      let(:music_not_deleted_id) { music_deleted.id }
 
       it 'return music by id' do
         expect(music_deleted.deleted).to eq(true)
-        expect(json['message']).to eq("Music not found by id: #{music_deleted.id}")
+        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
         expect(response).to have_http_status(404)
       end
     end
   end
 
   describe 'POST /musics' do
+    before { post '/musics', params: music_minimal_attributes }
 
     context 'when the request has the least amount of valid data' do
-      before { post '/musics', 
-        params: { 
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: duration
-        }
-      }
-
       it 'create music' do
-        expect(json['title']).to eq('Title Test')
-        expect(json['artist']).to eq('Artist Test')
-        expect(json['release_date']).to eq(release_date.to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(duration.strftime('%H:%M:%S'))
+        expect(json['title']).to eq(music_minimal_attributes[:title])
+        expect(json['artist']).to eq(music_minimal_attributes[:artist])
+        expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
         expect(json['number_views']).to eq(0)
         expect(json['feat']).to eq(false)
         expect(json['deleted']).to eq(false)
@@ -74,38 +74,22 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request is all attributes' do
-      before { post '/musics', 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: duration,
-          number_views: 1,
-          feat: true
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true } }
 
       it 'create music' do
-        expect(json['title']).to eq('Title Test')
-        expect(json['artist']).to eq('Artist Test')
-        expect(json['release_date']).to eq(release_date.to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(duration.strftime('%H:%M:%S'))
-        expect(json['number_views']).to eq(1)
-        expect(json['feat']).to eq(true)
+        expect(json['title']).to eq(music_minimal_attributes[:title])
+        expect(json['artist']).to eq(music_minimal_attributes[:artist])
+        expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
+        expect(json['number_views']).to eq(music_minimal_attributes[:number_views])
+        expect(json['feat']).to eq(music_minimal_attributes[:feat])
         expect(json['deleted']).to eq(false)
         expect(response).to have_http_status(201)
       end
     end
 
     context 'when the request does not have the title field' do
-      before { post '/musics', 
-        params: {
-          title: '', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: duration
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, title: '' } }
 
       it 'create music' do
         expect(json['message']).to eq('Title is required!')
@@ -114,14 +98,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request does not have the artist field' do
-      before { post '/musics', 
-        params: {
-          title: 'Title Test', 
-          artist: '', 
-          release_date: release_date, 
-          duration: duration
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, artist: '' } }
 
       it 'create music' do
         expect(json['message']).to eq('Artist is required!')
@@ -130,14 +107,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request does not have the release date field' do
-      before { post '/musics', 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: nil, 
-          duration: duration
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, release_date: nil } }
 
       it 'create music' do
         expect(json['message']).to eq('Release date is required!')
@@ -146,14 +116,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request does not have the duration field' do
-      before { post '/musics', 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: nil 
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, duration: nil } }
 
       it 'create music' do
         expect(json['message']).to eq('Duration is required!')
@@ -163,23 +126,15 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'PUT /musics/:id' do
+    before { put "/musics/#{music_not_deleted_id}", params: music_minimal_attributes }
 
     context 'when the request has the least amount of valid data' do
-      before { put "/musics/#{music_not_deleted.id}", 
-        params: { 
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: duration
-        }
-      }
-
       it 'update music' do
-        expect(json['id']).to eq(music_not_deleted.id)
-        expect(json['title']).to eq('Title Test')
-        expect(json['artist']).to eq('Artist Test')
-        expect(json['release_date']).to eq(release_date.to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(duration.strftime('%H:%M:%S'))
+        expect(json['id']).to eq(music_not_deleted_id)
+        expect(json['title']).to eq(music_minimal_attributes[:title])
+        expect(json['artist']).to eq(music_minimal_attributes[:artist])
+        expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
         expect(json['number_views']).to eq(0)
         expect(json['feat']).to eq(false)
         expect(json['deleted']).to eq(false)
@@ -188,39 +143,23 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request is all attributes' do
-      before { put "/musics/#{music_not_deleted.id}", 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: duration,
-          number_views: 1,
-          feat: true
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true } }
 
       it 'update music' do
-        expect(json['id']).to eq(music_not_deleted.id)
-        expect(json['title']).to eq('Title Test')
-        expect(json['artist']).to eq('Artist Test')
-        expect(json['release_date']).to eq(release_date.to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(duration.strftime('%H:%M:%S'))
-        expect(json['number_views']).to eq(1)
-        expect(json['feat']).to eq(true)
+        expect(json['id']).to eq(music_not_deleted_id)
+        expect(json['title']).to eq(music_minimal_attributes[:title])
+        expect(json['artist']).to eq(music_minimal_attributes[:artist])
+        expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
+        expect(json['number_views']).to eq(music_minimal_attributes[:number_views])
+        expect(json['feat']).to eq(music_minimal_attributes[:feat])
         expect(json['deleted']).to eq(false)
         expect(response).to have_http_status(200)
       end
     end
 
     context 'when the request does not have the title field' do
-      before { put "/musics/#{music_not_deleted.id}", 
-        params: {
-          title: '', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: duration
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, title: '' } }
 
       it 'update music' do
         expect(json['message']).to eq('Title is required!')
@@ -229,14 +168,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request does not have the artist field' do
-      before { put "/musics/#{music_not_deleted.id}", 
-        params: {
-          title: 'Title Test', 
-          artist: '', 
-          release_date: release_date, 
-          duration: duration
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, artist: '' } }
 
       it 'create music' do
         expect(json['message']).to eq('Artist is required!')
@@ -245,14 +177,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request does not have the release date field' do
-      before { put "/musics/#{music_not_deleted.id}", 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: nil, 
-          duration: duration
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, release_date: nil } }
 
       it 'create music' do
         expect(json['message']).to eq('Release date is required!')
@@ -261,14 +186,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request does not have the duration field' do
-      before { put "/musics/#{music_not_deleted.id}", 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: nil 
-        }
-      }
+      let(:music_minimal_attributes) { { **get_music, duration: nil } }
 
       it 'create music' do
         expect(json['message']).to eq('Duration is required!')
@@ -277,44 +195,29 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when music not exists' do
-      before { put "/musics/#{100}", 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: nil 
-        }
-      }
+      let(:music_not_deleted_id) { 100 }
 
       it 'update music' do
-        expect(json['message']).to eq("Music not found by id: #{100}")
+        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
         expect(response).to have_http_status(404)
       end
     end
 
     context 'when music is deleted' do
-      before { put "/musics/#{music_deleted.id}", 
-        params: {
-          title: 'Title Test', 
-          artist: 'Artist Test', 
-          release_date: release_date, 
-          duration: duration
-        }
-      }
+      let(:music_not_deleted_id) { music_deleted.id }
 
       it 'update music' do
         expect(music_deleted.deleted).to eq(true)
-        expect(json['message']).to eq("Music not found by id: #{music_deleted.id}")
+        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
         expect(response).to have_http_status(404)
       end
     end
   end
 
   describe 'DELETE /musics/:id' do
+    before { delete "/musics/#{music_not_deleted_id}" }
     
     context 'when music exists' do
-      before { delete "/musics/#{music_not_deleted.id}" }
-
       it 'logical deleted music' do
         expect(json['id']).to eq(music_not_deleted.id)
         expect(json['title']).to eq(music_not_deleted.title)
@@ -329,21 +232,21 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
 
-    context 'when music is deleted' do
-      before { delete "/musics/#{music_deleted.id}" }
+    context 'when music not exists' do
+      let(:music_not_deleted_id) { 100 }
 
       it 'logical deleted music' do
-        expect(music_deleted.deleted).to eq(true)
-        expect(json['message']).to eq("Music not found by id: #{music_deleted.id}")
+        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
         expect(response).to have_http_status(404)
       end
     end
 
-    context 'when music not exists' do
-      before { delete "/musics/#{100}" }
+    context 'when music is deleted' do
+      let(:music_not_deleted_id) { music_deleted.id }
 
       it 'logical deleted music' do
-        expect(json['message']).to eq("Music not found by id: #{100}")
+        expect(music_deleted.deleted).to eq(true)
+        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
         expect(response).to have_http_status(404)
       end
     end
