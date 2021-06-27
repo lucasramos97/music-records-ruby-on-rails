@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema.define(version: 2021_06_19_224058) do
 
-  create_table "musics", force: :cascade do |t|
+  create_table "musics", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title", null: false
     t.string "artist", null: false
     t.date "release_date", null: false

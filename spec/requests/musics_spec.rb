@@ -9,6 +9,11 @@ def get_music
   }
 end
 
+def get_duration(time)
+  time_plus_one_hour = time + (1*60*60)
+  return time_plus_one_hour.strftime('%H:%M:%S')
+end
+
 RSpec.describe 'Musics API', type: :request do
   let!(:musics) { create_list(:music, 10) }
   let!(:deleted_musics) { create_list(:music, 10, deleted: true) }
@@ -81,7 +86,7 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['title']).to eq(music_minimal_attributes[:title])
         expect(json['artist']).to eq(music_minimal_attributes[:artist])
         expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(0)
         expect(json['feat']).to eq(false)
         expect(json['deleted']).to eq(false)
@@ -96,7 +101,7 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['title']).to eq(music_minimal_attributes[:title])
         expect(json['artist']).to eq(music_minimal_attributes[:artist])
         expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(music_minimal_attributes[:number_views])
         expect(json['feat']).to eq(music_minimal_attributes[:feat])
         expect(json['deleted']).to eq(false)
@@ -150,7 +155,7 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['title']).to eq(music_minimal_attributes[:title])
         expect(json['artist']).to eq(music_minimal_attributes[:artist])
         expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(0)
         expect(json['feat']).to eq(false)
         expect(json['deleted']).to eq(false)
@@ -166,7 +171,7 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['title']).to eq(music_minimal_attributes[:title])
         expect(json['artist']).to eq(music_minimal_attributes[:artist])
         expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
-        expect(json['duration'].split('T')[1].split('.')[0]).to eq(music_minimal_attributes[:duration].strftime('%H:%M:%S'))
+        expect(json['duration'].split('T')[1].split('.')[0]).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(music_minimal_attributes[:number_views])
         expect(json['feat']).to eq(music_minimal_attributes[:feat])
         expect(json['deleted']).to eq(false)
