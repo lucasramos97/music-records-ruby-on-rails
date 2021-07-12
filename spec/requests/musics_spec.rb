@@ -272,4 +272,13 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
   end
+
+  describe 'GET /musics/deleted/count' do
+    before { get '/musics/deleted/count' }
+    
+    it 'count deleted musics' do
+      expect(json).to eq(10)
+      expect(response).to have_http_status(200)
+    end
+  end
 end

@@ -28,6 +28,10 @@ class MusicsController < ApplicationController
     json_response(@music)
   end
 
+  def count_deleted_musics
+    json_response(Music.where(deleted: true).count)
+  end
+
   private 
 
   def music_params
