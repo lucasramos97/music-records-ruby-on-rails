@@ -281,4 +281,29 @@ RSpec.describe 'Musics API', type: :request do
       expect(response).to have_http_status(200)
     end
   end
+
+  describe 'GET /musics/deleted' do
+
+    context 'no query strings' do
+      before { get '/musics/deleted' }
+
+      it 'returns deleted musics' do
+        expect(json).not_to be_empty
+        expect(json['content'].size).to eq(5)
+        expect(json['total']).to eq(10)
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'with query strings' do
+      before { get '/musics/deleted/?page=2&size=4' }
+
+      it 'returns deleted musics' do
+        expect(json).not_to be_empty
+        expect(json['content'].size).to eq(4)
+        expect(json['total']).to eq(10)
+        expect(response).to have_http_status(200)
+      end
+    end
+  end
 end

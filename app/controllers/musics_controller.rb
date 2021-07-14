@@ -32,6 +32,11 @@ class MusicsController < ApplicationController
     json_response(Music.where(deleted: true).count)
   end
 
+  def index_deleted_musics
+    @musics = Music.where(deleted: true).order(artist: :asc, title: :asc).page(page).per(size)
+    json_response(paged_musics(@musics))
+  end
+
   private 
 
   def music_params
