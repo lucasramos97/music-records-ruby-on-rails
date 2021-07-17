@@ -1,8 +1,9 @@
 class MusicsController < ApplicationController
   include Paginable
 
-  before_action :set_music, only: [:show, :update, :destroy]
+  before_action :set_music, only: [:show, :update, :destroy, :definitive_delete_music]
   before_action :verify_deleted_music, only: [:show, :update, :destroy]
+  before_action :verify_not_deleted_music, only: [:definitive_delete_music]
   
   def index
     @musics = Music.where(deleted: false).order(artist: :asc, title: :asc).page(page).per(size)
@@ -48,6 +49,11 @@ class MusicsController < ApplicationController
     json_response
   end
 
+  def definitive_delete_music
+    @music.destroy
+    json_response
+  end
+
   private 
 
   def music_params
@@ -70,6 +76,12 @@ class MusicsController < ApplicationController
       if not m.has_key?(:id)
         raise ActionController::ParameterMissing.new(:id)
       end
+    end
+  end
+
+  def verify_not_deleted_music
+    if not @music.deleted
+      raise ActiveRecord::RecordNotFound.new(message = '', model = @music, primary_key = @music.id, id = @music.id)
     end
   end
 

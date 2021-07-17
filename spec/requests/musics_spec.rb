@@ -21,6 +21,7 @@ RSpec.describe 'Musics API', type: :request do
   let(:music_not_deleted_id) { music_not_deleted.id }
   let(:music_deleted) { deleted_musics.first }
   let(:music_minimal_attributes) { get_music }
+  let(:music_deleted_id) { music_deleted.id }
 
   describe 'GET /musics' do
 
@@ -312,8 +313,8 @@ RSpec.describe 'Musics API', type: :request do
     
     context 'with valid list' do
       it 'restore deleted musics' do
-        expect(json).to eq(deleted_musics.length);
-        expect(Music.where(deleted: true).count).to eq(0);
+        expect(json).to eq(deleted_musics.length)
+        expect(Music.where(deleted: true).count).to eq(0)
         expect(response).to have_http_status(200)
       end
     end
@@ -322,7 +323,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:deleted_musics) { [ {id: 1}, {id: 2}, {} ] }
       
       it 'restore deleted musics' do
-        expect(json['message']).to eq('Id is required to all musics!');
+        expect(json['message']).to eq('Id is required to all musics!')
         expect(response).to have_http_status(400)
       end
     end
@@ -331,7 +332,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:deleted_musics) { [] }
       
       it 'restore deleted musics' do
-        expect(json['message']).to eq('Id is required to all musics!');
+        expect(json['message']).to eq('Id is required to all musics!')
         expect(response).to have_http_status(400)
       end
     end
@@ -340,7 +341,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:deleted_musics) { nil }
       
       it 'restore deleted musics' do
-        expect(json['message']).to eq('Id is required to all musics!');
+        expect(json['message']).to eq('Id is required to all musics!')
         expect(response).to have_http_status(400)
       end
     end
@@ -349,9 +350,38 @@ RSpec.describe 'Musics API', type: :request do
   describe 'DELETE musics/empty-list' do
     before { delete '/musics/empty-list' }
     
-    it 'definitely delete all deleted songs' do
-      expect(Music.where(deleted: true).count).to eq(0);
+    it 'definitely delete all deleted musics' do
+      expect(Music.where(deleted: true).count).to eq(0)
       expect(response).to have_http_status(200)
+    end
+  end
+
+  describe 'DELETE musics/definitive/:id' do
+    before { delete "/musics/definitive/#{music_deleted_id}" }
+    
+    context 'when music exists' do
+      it 'definitely delete a deleted music' do
+        expect { Music.find(music_deleted_id) }.to raise_exception(ActiveRecord::RecordNotFound)
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'when music not exists' do
+      let(:music_deleted_id) { 100 }
+
+      it 'definitely delete a deleted music' do
+        expect(json['message']).to eq("Music not found by id: #{music_deleted_id}")
+        expect(response).to have_http_status(404)
+      end
+    end
+
+    context 'when music is not deleted' do
+      let(:music_deleted_id) { music_not_deleted_id }
+
+      it 'definitely delete a deleted music' do
+        expect(json['message']).to eq("Music not found by id: #{music_deleted_id}")
+        expect(response).to have_http_status(404)
+      end
     end
   end
 end
