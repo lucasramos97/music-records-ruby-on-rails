@@ -9,6 +9,10 @@ module ExceptionHandler extend ActiveSupport::Concern
       json_response(format_record_invalid_message(e.message), :bad_request)
     end
 
+    rescue_from ActionController::ParameterMissing do |e|
+      json_response({ message: 'Id is required to all musics!' }, :bad_request)
+    end
+
     private
 
     def format_record_invalid_message(message)

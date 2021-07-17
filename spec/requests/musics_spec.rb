@@ -306,4 +306,43 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
   end
+
+  describe 'POST musics/deleted/restore' do
+    before { post '/musics/deleted/restore', params: deleted_musics, as: :json }
+    
+    context 'with valid list' do
+      it 'restore deleted musics' do
+        expect(json).to eq(deleted_musics.length);
+        expect(Music.where(deleted: true).count).to eq(0);
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'withot id field in list' do
+      let(:deleted_musics) { [ {id: 1}, {id: 2}, {} ] }
+      
+      it 'restore deleted musics' do
+        expect(json['message']).to eq('Id is required to all musics!');
+        expect(response).to have_http_status(400)
+      end
+    end
+
+    context 'with empy list' do
+      let(:deleted_musics) { [] }
+      
+      it 'restore deleted musics' do
+        expect(json['message']).to eq('Id is required to all musics!');
+        expect(response).to have_http_status(400)
+      end
+    end
+
+    context 'withot list' do
+      let(:deleted_musics) { nil }
+      
+      it 'restore deleted musics' do
+        expect(json['message']).to eq('Id is required to all musics!');
+        expect(response).to have_http_status(400)
+      end
+    end
+  end
 end

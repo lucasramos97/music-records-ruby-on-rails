@@ -37,6 +37,12 @@ class MusicsController < ApplicationController
     json_response(paged_musics(@musics))
   end
 
+  def restore_deleted_musics
+    verify_restore_deleted_musics
+    ids = params[:_json].map { |m| m[:id] }
+    json_response(Music.where(id: ids).update_all(deleted: false))
+  end
+
   private 
 
   def music_params
@@ -50,6 +56,15 @@ class MusicsController < ApplicationController
   def verify_deleted_music
     if @music.deleted
       raise ActiveRecord::RecordNotFound.new(message = '', model = @music, primary_key = @music.id, id = @music.id)
+    end
+  end
+
+  def verify_restore_deleted_musics
+    params.require(:_json)
+    params[:_json].each do |m|
+      if not m.has_key?(:id)
+        raise ActionController::ParameterMissing.new(:id)
+      end
     end
   end
 
