@@ -43,6 +43,11 @@ class MusicsController < ApplicationController
     json_response(Music.where(id: ids).update_all(deleted: false))
   end
 
+  def empty_list
+    Music.where(deleted: true).destroy_all
+    json_response
+  end
+
   private 
 
   def music_params

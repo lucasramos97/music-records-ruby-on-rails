@@ -345,4 +345,13 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
   end
+
+  describe 'DELETE musics/empty-list' do
+    before { delete '/musics/empty-list' }
+    
+    it 'definitely delete all deleted songs' do
+      expect(Music.where(deleted: true).count).to eq(0);
+      expect(response).to have_http_status(200)
+    end
+  end
 end
