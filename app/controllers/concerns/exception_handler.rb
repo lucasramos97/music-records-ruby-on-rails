@@ -1,27 +1,55 @@
 module ExceptionHandler extend ActiveSupport::Concern
+  class ParameterInvalid < StandardError; end
+  class AuthenticationError < StandardError; end
+  
   included do
-    
     rescue_from ActiveRecord::RecordNotFound do |e|
-      json_response({ message: "Music not found by id: #{e.id}" }, :not_found)
+      json_response({ message: 'Music not found!' }, :not_found)
     end
 
     rescue_from ActiveRecord::RecordInvalid do |e|
-      json_response(format_record_invalid_message(e.message), :bad_request)
+      json_response(record_invalid_message(e.record.errors), :bad_request)
     end
 
     rescue_from ActionController::ParameterMissing do |e|
-      json_response({ message: 'Id is required to all musics!' }, :bad_request)
+      json_response(parameter_missing_message(e.param), :bad_request)
+    end
+
+    rescue_from ExceptionHandler::ParameterInvalid do |e|
+      json_response({ message: e.message }, :bad_request)
+    end
+
+    rescue_from ExceptionHandler::AuthenticationError do |e|
+      json_response({ message: e.message }, :unauthorized)
     end
 
     private
-
-    def format_record_invalid_message(message)
-      field = message.split('Validation failed: ')[1].split(" can't be blank")[0]
-      if field.start_with?('User must exist, ')
-        return { message: "#{field.split('User must exist, ')[1]} is required!" }
+    
+    def record_invalid_message(errors)
+      if errors.has_key?(:title)
+        return { message: 'Title is required!' }
+      elsif errors.has_key?(:artist)
+        return { message: 'Artist is required!' }
+      elsif errors.has_key?(:release_date)
+        return { message: 'Release Date is required!' }
+      elsif errors.has_key?(:duration)
+        return { message: 'Duration is required!' }
+      else
+        return { message: '!' }
       end
+    end
 
-      return { message: "#{field} is required!" }
+    def parameter_missing_message(param)
+      if param == :email
+        return { message: 'E-mail is required!' }
+      elsif param == :password
+        return { message: 'Password is required!' }
+      elsif param == :_json or param == :id
+        return { message: 'Id is required to all musics!' }
+      else
+        puts param
+        return { message: '!' }
+      end
     end
   end
 end

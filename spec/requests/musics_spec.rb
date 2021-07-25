@@ -64,7 +64,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:music_not_deleted_id) { 100 }
 
       it 'return music by id' do
-        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end
@@ -74,7 +74,7 @@ RSpec.describe 'Musics API', type: :request do
 
       it 'return music by id' do
         expect(music_deleted.deleted).to eq(true)
-        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end
@@ -133,7 +133,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:music_minimal_attributes) { { **get_music, release_date: nil } }
 
       it 'create music' do
-        expect(json['message']).to eq('Release date is required!')
+        expect(json['message']).to eq('Release Date is required!')
         expect(response).to have_http_status(400)
       end
     end
@@ -203,7 +203,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:music_minimal_attributes) { { **get_music, release_date: nil } }
 
       it 'create music' do
-        expect(json['message']).to eq('Release date is required!')
+        expect(json['message']).to eq('Release Date is required!')
         expect(response).to have_http_status(400)
       end
     end
@@ -221,7 +221,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:music_not_deleted_id) { 100 }
 
       it 'update music' do
-        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end
@@ -231,7 +231,7 @@ RSpec.describe 'Musics API', type: :request do
 
       it 'update music' do
         expect(music_deleted.deleted).to eq(true)
-        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end
@@ -259,7 +259,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:music_not_deleted_id) { 100 }
 
       it 'logical deleted music' do
-        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end
@@ -269,7 +269,7 @@ RSpec.describe 'Musics API', type: :request do
 
       it 'logical deleted music' do
         expect(music_deleted.deleted).to eq(true)
-        expect(json['message']).to eq("Music not found by id: #{music_not_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end
@@ -371,7 +371,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:music_deleted_id) { 100 }
 
       it 'definitely delete a deleted music' do
-        expect(json['message']).to eq("Music not found by id: #{music_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end
@@ -380,7 +380,7 @@ RSpec.describe 'Musics API', type: :request do
       let(:music_deleted_id) { music_not_deleted_id }
 
       it 'definitely delete a deleted music' do
-        expect(json['message']).to eq("Music not found by id: #{music_deleted_id}")
+        expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
     end

@@ -28,6 +28,8 @@ gem 'bootsnap', '>= 1.4.4', require: false
 gem 'kaminari', '~> 1.2'
 gem 'mysql2', '~> 0.5.3'
 gem 'rack-cors'
+gem 'jwt'
+gem 'bcrypt', '~> 3.1.7'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
