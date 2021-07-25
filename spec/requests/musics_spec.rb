@@ -15,12 +15,13 @@ def get_duration(time)
 end
 
 RSpec.describe 'Musics API', type: :request do
-  let!(:musics) { create_list(:music, 10) }
-  let!(:deleted_musics) { create_list(:music, 10, deleted: true) }
+  let!(:user) { create(:user) }
+  let!(:musics) { create_list(:music, 10, user: user) }
+  let!(:deleted_musics) { create_list(:music, 10, deleted: true, user: user) }
   let(:music_not_deleted) { musics.first }
   let(:music_not_deleted_id) { music_not_deleted.id }
   let(:music_deleted) { deleted_musics.first }
-  let(:music_minimal_attributes) { get_music }
+  let(:music_minimal_attributes) { { **get_music, user_id: user.id } }
   let(:music_deleted_id) { music_deleted.id }
 
   describe 'GET /musics' do
@@ -96,7 +97,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request is all attributes' do
-      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true } }
+      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true, user_id: user.id } }
 
       it 'create music' do
         expect(json['title']).to eq(music_minimal_attributes[:title])

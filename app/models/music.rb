@@ -1,4 +1,5 @@
 class Music < ApplicationRecord
+  belongs_to :user
   validates_presence_of :title, :artist, :release_date, :duration
 
   def duration
