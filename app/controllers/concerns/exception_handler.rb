@@ -23,6 +23,11 @@ module ExceptionHandler extend ActiveSupport::Concern
       json_response({ message: e.message }, :unauthorized)
     end
 
+    rescue_from ActiveRecord::RecordNotUnique do |e|
+      json = JSON.parse(e.binds[1].to_json)
+      json_response({ message: "The #{json['value']} e-mail has already been registered!" }, :bad_request)
+    end
+
     private
     
     def record_invalid_message(errors)
@@ -40,14 +45,15 @@ module ExceptionHandler extend ActiveSupport::Concern
     end
 
     def parameter_missing_message(param)
-      if param == :email
+      if param == :username
+        return { message: 'Username is required!' }
+      elsif param == :email
         return { message: 'E-mail is required!' }
       elsif param == :password
         return { message: 'Password is required!' }
       elsif param == :_json or param == :id
         return { message: 'Id is required to all musics!' }
       else
-        puts param
         return { message: '!' }
       end
     end

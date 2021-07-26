@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   post '/login', to: 'users#login'
+  post '/users', to: 'users#create'
 
   get '/musics/deleted/count', to: 'musics#count_deleted_musics'
   get '/musics/deleted', to: 'musics#index_deleted_musics'
