@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
-  before_action :verify_create, only: [:create]
+  skip_before_action :authorize_request, only: [:login, :create]
+  before_action :verify_create, only: :create
   before_action :verify_login, only: [:login, :create]
 
   def login

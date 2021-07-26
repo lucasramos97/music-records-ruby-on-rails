@@ -3,8 +3,8 @@ class MusicsController < ApplicationController
 
   before_action :set_music, only: [:show, :update, :destroy, :definitive_delete_music]
   before_action :verify_deleted_music, only: [:show, :update, :destroy]
-  before_action :verify_not_deleted_music, only: [:definitive_delete_music]
-  before_action :verify_restore_deleted_musics, only: [:restore_deleted_musics]
+  before_action :verify_not_deleted_music, only: :definitive_delete_music
+  before_action :verify_restore_deleted_musics, only: :restore_deleted_musics
   
   def index
     @musics = Music.where(deleted: false).order(artist: :asc, title: :asc).page(page).per(size)

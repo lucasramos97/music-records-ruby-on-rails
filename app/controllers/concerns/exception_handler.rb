@@ -1,6 +1,7 @@
 module ExceptionHandler extend ActiveSupport::Concern
   class ParameterInvalid < StandardError; end
   class AuthenticationError < StandardError; end
+  class InvalidToken < StandardError; end
   
   included do
     rescue_from ActiveRecord::RecordNotFound do |e|
@@ -19,7 +20,7 @@ module ExceptionHandler extend ActiveSupport::Concern
       json_response({ message: e.message }, :bad_request)
     end
 
-    rescue_from ExceptionHandler::AuthenticationError do |e|
+    rescue_from ExceptionHandler::AuthenticationError, ExceptionHandler::InvalidToken do |e|
       json_response({ message: e.message }, :unauthorized)
     end
 

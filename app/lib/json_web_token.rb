@@ -10,6 +10,6 @@ class JsonWebToken
     body = JWT.decode(token, SECRET_KEY)[0]
     HashWithIndifferentAccess.new body
   rescue JWT::DecodeError => e
-    raise ExceptionHandler::InvalidToken, e.message
+    raise ExceptionHandler::InvalidToken, 'Invalid token!'
   end
 end
