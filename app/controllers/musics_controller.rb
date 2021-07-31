@@ -61,12 +61,15 @@ class MusicsController < ApplicationController
   end
 
   def set_music
-    @music = Music.find(params[:id])
+    @music = Music.where(id: params[:id], user_id: @current_user[:id]).first
+    if not @music
+      raise ActiveRecord::RecordNotFound.new(message = nil, model = nil, primary_key = nil, id = nil)
+    end
   end
 
   def verify_deleted_music
     if @music.deleted
-      raise ActiveRecord::RecordNotFound.new(message = '', model = @music, primary_key = @music.id, id = @music.id)
+      raise ActiveRecord::RecordNotFound.new(message = nil, model = nil, primary_key = nil, id = nil)
     end
   end
 
@@ -81,7 +84,7 @@ class MusicsController < ApplicationController
 
   def verify_not_deleted_music
     if not @music.deleted
-      raise ActiveRecord::RecordNotFound.new(message = '', model = @music, primary_key = @music.id, id = @music.id)
+      raise ActiveRecord::RecordNotFound.new(message = nil, model = nil, primary_key = nil, id = nil)
     end
   end
 

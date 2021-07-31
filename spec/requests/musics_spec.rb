@@ -54,11 +54,11 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
 
-    context 'defer songs by users' do
+    context 'defer musics by users' do
       let(:valid_headers) { valid_headers_user2 }
 
       it 'returns musics' do
-        
+
         ids_music_user1 = Music.where(deleted: false, user_id: user1.id).order(artist: :asc, title: :asc).page(1).per(5).map { |m| m.id }
         ids_music_user2 = json['content'].map { |m| m['id'] }
         match_ids = false
@@ -120,7 +120,7 @@ RSpec.describe 'Musics API', type: :request do
     context 'when music exists' do
       it 'return music by id' do
         expect(json).not_to be_empty
-        expect(json['id']).to eq(music_not_deleted.id)
+        expect(json['id']).to eq(music_not_deleted_id)
         expect(response).to have_http_status(200)
       end
     end
@@ -139,6 +139,15 @@ RSpec.describe 'Musics API', type: :request do
 
       it 'return music by id' do
         expect(music_deleted.deleted).to eq(true)
+        expect(json['message']).to eq('Music not found!')
+        expect(response).to have_http_status(404)
+      end
+    end
+
+    context 'defer music by users' do
+      let(:valid_headers) { valid_headers_user2 }
+
+      it 'return music by id' do
         expect(json['message']).to eq('Music not found!')
         expect(response).to have_http_status(404)
       end
