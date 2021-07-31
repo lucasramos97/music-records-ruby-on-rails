@@ -31,21 +31,21 @@ class MusicsController < ApplicationController
   end
 
   def count_deleted_musics
-    json_response(Music.where(deleted: true).count)
+    json_response(Music.where(deleted: true, user_id: @current_user[:id]).count)
   end
 
   def index_deleted_musics
-    @musics = Music.where(deleted: true).order(artist: :asc, title: :asc).page(page).per(size)
+    @musics = Music.where(deleted: true, user_id: @current_user[:id]).order(artist: :asc, title: :asc).page(page).per(size)
     json_response(paged_musics(@musics))
   end
 
   def restore_deleted_musics
     ids = params[:_json].map { |m| m[:id] }
-    json_response(Music.where(id: ids).update_all(deleted: false))
+    json_response(Music.where(id: ids, user_id: @current_user[:id]).update_all(deleted: false))
   end
 
   def empty_list
-    Music.where(deleted: true).destroy_all
+    Music.where(deleted: true, user_id: @current_user[:id]).destroy_all
     json_response
   end
 

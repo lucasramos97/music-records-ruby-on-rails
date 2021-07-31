@@ -19,20 +19,21 @@ RSpec.describe 'Musics API', type: :request do
   let!(:user2) { create(:user) }
   let!(:musics_user1) { create_list(:music, 10, user: user1) }
   let!(:musics_user2) { create_list(:music, 10, user: user2) }
-  let!(:deleted_musics) { create_list(:music, 10, deleted: true, user: user1) }
+  let!(:deleted_musics_user1) { create_list(:music, 10, deleted: true, user: user1) }
+  let!(:deleted_musics_user2) { create_list(:music, 10, deleted: true, user: user2) }
   let(:music_not_deleted) { musics_user1.first }
   let(:music_not_deleted_id) { music_not_deleted.id }
-  let(:music_deleted) { deleted_musics.first }
+  let(:music_deleted) { deleted_musics_user1.first }
   let(:music_minimal_attributes) { { **get_music, user_id: user1.id } }
   let(:music_deleted_id) { music_deleted.id }
-  let(:valid_headers) { { 'Authorization': "Bearer #{token_generator(user1.id)}" } }
+  let(:valid_headers_user1) { { 'Authorization': "Bearer #{token_generator(user1.id)}" } }
   let(:valid_headers_user2) { { 'Authorization': "Bearer #{token_generator(user2.id)}" } }
   let(:invalid_headers) { { 'Authorization': 'Bearer 123' } }
   let(:no_bearer_headers) { { 'Authorization': "Token #{token_generator(user1.id)}" } }
   let(:no_token_headers) { { 'Authorization': 'Bearer ' } }
 
   describe 'GET /musics' do
-    before { get '/musics', params: {}, headers: valid_headers }
+    before { get '/musics', params: {}, headers: valid_headers_user1 }
 
     context 'no query strings' do
       it 'returns musics' do
@@ -44,7 +45,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with query strings' do
-      before { get '/musics?page=2&size=4', params: {}, headers: valid_headers }
+      before { get '/musics?page=2&size=4', params: {}, headers: valid_headers_user1 }
 
       it 'returns musics' do
         expect(json).not_to be_empty
@@ -55,7 +56,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'defer musics by users' do
-      let(:valid_headers) { valid_headers_user2 }
+      let(:valid_headers_user1) { valid_headers_user2 }
 
       it 'returns musics' do
 
@@ -78,7 +79,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'returns musics' do
         expect(json['message']).to eq('Invalid token!')
@@ -87,7 +88,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'returns musics' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -96,7 +97,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'returns musics' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -105,7 +106,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'returns musics' do
         expect(json['message']).to eq('No token provided!')
@@ -115,7 +116,7 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'GET /musics/:id' do
-    before { get "/musics/#{music_not_deleted_id}", params: {}, headers: valid_headers }
+    before { get "/musics/#{music_not_deleted_id}", params: {}, headers: valid_headers_user1 }
 
     context 'when music exists' do
       it 'return music by id' do
@@ -145,7 +146,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'defer music by users' do
-      let(:valid_headers) { valid_headers_user2 }
+      let(:valid_headers_user1) { valid_headers_user2 }
 
       it 'return music by id' do
         expect(json['message']).to eq('Music not found!')
@@ -154,7 +155,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'return music by id' do
         expect(json['message']).to eq('Invalid token!')
@@ -163,7 +164,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'return music by id' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -172,7 +173,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'return music by id' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -181,7 +182,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'return music by id' do
         expect(json['message']).to eq('No token provided!')
@@ -191,7 +192,7 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'POST /musics' do
-    before { post '/musics', params: music_minimal_attributes, headers: valid_headers }
+    before { post '/musics', params: music_minimal_attributes, headers: valid_headers_user1 }
 
     context 'when the request has the least amount of valid data' do
       it 'create music' do
@@ -258,7 +259,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'create music' do
         expect(json['message']).to eq('Invalid token!')
@@ -267,7 +268,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'create music' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -276,7 +277,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'create music' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -285,7 +286,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'create music' do
         expect(json['message']).to eq('No token provided!')
@@ -295,7 +296,7 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'PUT /musics/:id' do
-    before { put "/musics/#{music_not_deleted_id}", params: music_minimal_attributes, headers: valid_headers }
+    before { put "/musics/#{music_not_deleted_id}", params: music_minimal_attributes, headers: valid_headers_user1 }
 
     context 'when the request has the least amount of valid data' do
       it 'update music' do
@@ -382,8 +383,17 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
 
+    context 'defer music by users' do
+      let(:valid_headers_user1) { valid_headers_user2 }
+
+      it 'update music' do
+        expect(json['message']).to eq('Music not found!')
+        expect(response).to have_http_status(404)
+      end
+    end
+
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'update music' do
         expect(json['message']).to eq('Invalid token!')
@@ -392,7 +402,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'update music' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -401,7 +411,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'update music' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -410,7 +420,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'update music' do
         expect(json['message']).to eq('No token provided!')
@@ -420,7 +430,7 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'DELETE /musics/:id' do
-    before { delete "/musics/#{music_not_deleted_id}", params: {}, headers: valid_headers }
+    before { delete "/musics/#{music_not_deleted_id}", params: {}, headers: valid_headers_user1 }
     
     context 'when music exists' do
       it 'logical deleted music' do
@@ -456,8 +466,17 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
 
+    context 'defer music by users' do
+      let(:valid_headers_user1) { valid_headers_user2 }
+
+      it 'logical deleted music' do
+        expect(json['message']).to eq('Music not found!')
+        expect(response).to have_http_status(404)
+      end
+    end
+
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'logical deleted music' do
         expect(json['message']).to eq('Invalid token!')
@@ -466,7 +485,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'logical deleted music' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -475,7 +494,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'logical deleted music' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -484,7 +503,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'logical deleted music' do
         expect(json['message']).to eq('No token provided!')
@@ -494,7 +513,7 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'GET /musics/deleted/count' do
-    before { get '/musics/deleted/count', params: {}, headers: valid_headers }
+    before { get '/musics/deleted/count', params: {}, headers: valid_headers_user1 }
     
     context 'with valid authorization header' do
       it 'count deleted musics' do
@@ -503,8 +522,17 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
 
+    context 'defer music by users' do
+      let(:valid_headers_user1) { valid_headers_user2 }
+
+      it 'count deleted musics' do
+        expect(json).to eq(10)
+        expect(response).to have_http_status(200)
+      end
+    end
+
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'count deleted musics' do
         expect(json['message']).to eq('Invalid token!')
@@ -513,7 +541,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'count deleted musics' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -522,7 +550,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'count deleted musics' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -531,7 +559,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'count deleted musics' do
         expect(json['message']).to eq('No token provided!')
@@ -541,7 +569,7 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'GET /musics/deleted' do
-    before { get '/musics/deleted', params: {}, headers: valid_headers }
+    before { get '/musics/deleted', params: {}, headers: valid_headers_user1 }
 
     context 'no query strings' do
       it 'returns deleted musics' do
@@ -553,7 +581,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with query strings' do
-      before { get '/musics/deleted/?page=2&size=4', params: {}, headers: valid_headers }
+      before { get '/musics/deleted/?page=2&size=4', params: {}, headers: valid_headers_user1 }
 
       it 'returns deleted musics' do
         expect(json).not_to be_empty
@@ -563,8 +591,31 @@ RSpec.describe 'Musics API', type: :request do
       end
     end
 
+    context 'defer deleted musics by users' do
+      let(:valid_headers_user1) { valid_headers_user2 }
+
+      it 'returns deleted musics' do
+
+        ids_deleted_music_user1 = Music.where(deleted: true, user_id: user1.id).order(artist: :asc, title: :asc).page(1).per(5).map { |m| m.id }
+        ids_deleted_music_user2 = json['content'].map { |m| m['id'] }
+        match_ids = false
+        ids_deleted_music_user1.each { |i|
+          if ids_deleted_music_user2.include?(i)
+            match_ids = true
+            break
+          end
+        }
+
+        expect(json).not_to be_empty
+        expect(json['content'].size).to eq(5)
+        expect(json['total']).to eq(10)
+        expect(match_ids).to be_falsey
+        expect(response).to have_http_status(200)
+      end
+    end
+
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'returns deleted musics' do
         expect(json['message']).to eq('Invalid token!')
@@ -573,7 +624,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'returns deleted musics' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -582,7 +633,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'returns deleted musics' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -591,7 +642,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'returns deleted musics' do
         expect(json['message']).to eq('No token provided!')
@@ -601,18 +652,19 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'POST musics/deleted/restore' do
-    before { post '/musics/deleted/restore', params: deleted_musics, headers: valid_headers, as: :json }
+    before { post '/musics/deleted/restore', params: deleted_musics_user1, headers: valid_headers_user1, as: :json }
     
     context 'with valid list' do
       it 'restore deleted musics' do
-        expect(json).to eq(deleted_musics.length)
-        expect(Music.where(deleted: true).count).to eq(0)
+        expect(json).to eq(deleted_musics_user1.length)
+        expect(Music.where(deleted: true, user_id: user1.id).count).to eq(0)
+        expect(Music.where(deleted: true, user_id: user2.id).count).to eq(10)
         expect(response).to have_http_status(200)
       end
     end
 
-    context 'withot id field in list' do
-      let(:deleted_musics) { [ {id: 1}, {id: 2}, {} ] }
+    context 'without id field in list' do
+      let(:deleted_musics_user1) { [ {id: 1}, {id: 2}, {} ] }
       
       it 'restore deleted musics' do
         expect(json['message']).to eq('Id is required to all musics!')
@@ -621,7 +673,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with empy list' do
-      let(:deleted_musics) { [] }
+      let(:deleted_musics_user1) { [] }
       
       it 'restore deleted musics' do
         expect(json['message']).to eq('Id is required to all musics!')
@@ -630,7 +682,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without list' do
-      let(:deleted_musics) { nil }
+      let(:deleted_musics_user1) { nil }
       
       it 'restore deleted musics' do
         expect(json['message']).to eq('Id is required to all musics!')
@@ -639,7 +691,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'restore deleted musics' do
         expect(json['message']).to eq('Invalid token!')
@@ -648,7 +700,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'restore deleted musics' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -657,7 +709,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'restore deleted musics' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -666,7 +718,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'restore deleted musics' do
         expect(json['message']).to eq('No token provided!')
@@ -676,17 +728,18 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'DELETE musics/empty-list' do
-    before { delete '/musics/empty-list', params: {}, headers: valid_headers }
+    before { delete '/musics/empty-list', params: {}, headers: valid_headers_user1 }
     
     context 'with valid authorization header' do
       it 'definitely delete all deleted musics' do
-        expect(Music.where(deleted: true).count).to eq(0)
+        expect(Music.where(deleted: true, user_id: user1.id).count).to eq(0)
+        expect(Music.where(deleted: true, user_id: user2.id).count).to eq(10)
         expect(response).to have_http_status(200)
       end
     end
 
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'definitely delete all deleted musics' do
         expect(json['message']).to eq('Invalid token!')
@@ -695,7 +748,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'definitely delete all deleted musics' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -704,7 +757,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'definitely delete all deleted musics' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -713,7 +766,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'definitely delete all deleted musics' do
         expect(json['message']).to eq('No token provided!')
@@ -723,11 +776,11 @@ RSpec.describe 'Musics API', type: :request do
   end
 
   describe 'DELETE musics/definitive/:id' do
-    before { delete "/musics/definitive/#{music_deleted_id}", params: {}, headers: valid_headers }
+    before { delete "/musics/definitive/#{music_deleted_id}", params: {}, headers: valid_headers_user1 }
     
     context 'when music exists' do
       it 'definitely delete a deleted music' do
-        expect { Music.find(music_deleted_id) }.to raise_exception(ActiveRecord::RecordNotFound)
+        expect(Music.where(id: music_deleted_id, user_id: music_deleted_id).first).to be_nil
         expect(response).to have_http_status(200)
       end
     end
@@ -751,7 +804,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'with invalid authorization header' do
-      let(:valid_headers) { invalid_headers }
+      let(:valid_headers_user1) { invalid_headers }
 
       it 'definitely delete a deleted music' do
         expect(json['message']).to eq('Invalid token!')
@@ -760,7 +813,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without authorization header' do
-      let(:valid_headers) { nil }
+      let(:valid_headers_user1) { nil }
 
       it 'definitely delete a deleted music' do
         expect(json['message']).to eq('Header Authorization not present!')
@@ -769,7 +822,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without Bearer HTTP authentication scheme' do
-      let(:valid_headers) { no_bearer_headers }
+      let(:valid_headers_user1) { no_bearer_headers }
 
       it 'definitely delete a deleted music' do
         expect(json['message']).to eq('No Bearer HTTP authentication scheme!')
@@ -778,7 +831,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'without token value' do
-      let(:valid_headers) { no_token_headers }
+      let(:valid_headers_user1) { no_token_headers }
 
       it 'definitely delete a deleted music' do
         expect(json['message']).to eq('No token provided!')
