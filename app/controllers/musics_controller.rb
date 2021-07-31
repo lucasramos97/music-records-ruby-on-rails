@@ -7,7 +7,7 @@ class MusicsController < ApplicationController
   before_action :verify_restore_deleted_musics, only: :restore_deleted_musics
   
   def index
-    @musics = Music.where(deleted: false).order(artist: :asc, title: :asc).page(page).per(size)
+    @musics = Music.where(deleted: false, user_id: @current_user[:id]).order(artist: :asc, title: :asc).page(page).per(size)
     json_response(paged_musics(@musics))
   end
 

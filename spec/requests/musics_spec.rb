@@ -15,17 +15,20 @@ def get_duration(time)
 end
 
 RSpec.describe 'Musics API', type: :request do
-  let!(:user) { create(:user) }
-  let!(:musics) { create_list(:music, 10, user: user) }
-  let!(:deleted_musics) { create_list(:music, 10, deleted: true, user: user) }
-  let(:music_not_deleted) { musics.first }
+  let!(:user1) { create(:user) }
+  let!(:user2) { create(:user) }
+  let!(:musics_user1) { create_list(:music, 10, user: user1) }
+  let!(:musics_user2) { create_list(:music, 10, user: user2) }
+  let!(:deleted_musics) { create_list(:music, 10, deleted: true, user: user1) }
+  let(:music_not_deleted) { musics_user1.first }
   let(:music_not_deleted_id) { music_not_deleted.id }
   let(:music_deleted) { deleted_musics.first }
-  let(:music_minimal_attributes) { { **get_music, user_id: user.id } }
+  let(:music_minimal_attributes) { { **get_music, user_id: user1.id } }
   let(:music_deleted_id) { music_deleted.id }
-  let(:valid_headers) { { 'Authorization': "Bearer #{token_generator(user.id)}" } }
+  let(:valid_headers) { { 'Authorization': "Bearer #{token_generator(user1.id)}" } }
+  let(:valid_headers_user2) { { 'Authorization': "Bearer #{token_generator(user2.id)}" } }
   let(:invalid_headers) { { 'Authorization': 'Bearer 123' } }
-  let(:no_bearer_headers) { { 'Authorization': "Token #{token_generator(user.id)}" } }
+  let(:no_bearer_headers) { { 'Authorization': "Token #{token_generator(user1.id)}" } }
   let(:no_token_headers) { { 'Authorization': 'Bearer ' } }
 
   describe 'GET /musics' do
@@ -47,6 +50,29 @@ RSpec.describe 'Musics API', type: :request do
         expect(json).not_to be_empty
         expect(json['content'].size).to eq(4)
         expect(json['total']).to eq(10)
+        expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'defer songs by users' do
+      let(:valid_headers) { valid_headers_user2 }
+
+      it 'returns musics' do
+        
+        ids_music_user1 = Music.where(deleted: false, user_id: user1.id).order(artist: :asc, title: :asc).page(1).per(5).map { |m| m.id }
+        ids_music_user2 = json['content'].map { |m| m['id'] }
+        match_ids = false
+        ids_music_user1.each { |i|
+          if ids_music_user2.include?(i)
+            match_ids = true
+            break
+          end
+        }
+
+        expect(json).not_to be_empty
+        expect(json['content'].size).to eq(5)
+        expect(json['total']).to eq(10)
+        expect(match_ids).to be_falsey
         expect(response).to have_http_status(200)
       end
     end
@@ -165,14 +191,14 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
         expect(json['duration']).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(0)
-        expect(json['feat']).to eq(false)
-        expect(json['deleted']).to eq(false)
+        expect(json['feat']).to be_falsey
+        expect(json['deleted']).to be_falsey
         expect(response).to have_http_status(201)
       end
     end
 
     context 'when the request is all attributes' do
-      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true, user_id: user.id } }
+      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true, user_id: user1.id } }
 
       it 'create music' do
         expect(json['title']).to eq(music_minimal_attributes[:title])
@@ -181,7 +207,7 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['duration']).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(music_minimal_attributes[:number_views])
         expect(json['feat']).to eq(music_minimal_attributes[:feat])
-        expect(json['deleted']).to eq(false)
+        expect(json['deleted']).to be_falsey
         expect(response).to have_http_status(201)
       end
     end
@@ -270,8 +296,8 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['release_date']).to eq(music_minimal_attributes[:release_date].to_s)
         expect(json['duration']).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(0)
-        expect(json['feat']).to eq(false)
-        expect(json['deleted']).to eq(false)
+        expect(json['feat']).to be_falsey
+        expect(json['deleted']).to be_falsey
         expect(response).to have_http_status(200)
       end
     end
@@ -287,7 +313,7 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['duration']).to eq(get_duration(music_minimal_attributes[:duration]))
         expect(json['number_views']).to eq(music_minimal_attributes[:number_views])
         expect(json['feat']).to eq(music_minimal_attributes[:feat])
-        expect(json['deleted']).to eq(false)
+        expect(json['deleted']).to be_falsey
         expect(response).to have_http_status(200)
       end
     end
@@ -396,7 +422,7 @@ RSpec.describe 'Musics API', type: :request do
         expect(json['duration']).to eq(music_not_deleted.duration)
         expect(json['number_views']).to eq(music_not_deleted.number_views)
         expect(json['feat']).to eq(music_not_deleted.feat)
-        expect(music_not_deleted.deleted).to eq(false)
+        expect(music_not_deleted.deleted).to be_falsey
         expect(json['deleted']).to eq(true)
         expect(response).to have_http_status(200)
       end
