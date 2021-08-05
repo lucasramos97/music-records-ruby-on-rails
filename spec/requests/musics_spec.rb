@@ -24,7 +24,7 @@ RSpec.describe 'Musics API', type: :request do
   let(:music_not_deleted) { musics_user1.first }
   let(:music_not_deleted_id) { music_not_deleted.id }
   let(:music_deleted) { deleted_musics_user1.first }
-  let(:music_minimal_attributes) { { **get_music, user_id: user1.id } }
+  let(:music_minimal_attributes) { { **get_music } }
   let(:music_deleted_id) { music_deleted.id }
   let(:valid_headers_user1) { { 'Authorization': "Bearer #{token_generator(user1.id)}" } }
   let(:valid_headers_user2) { { 'Authorization': "Bearer #{token_generator(user2.id)}" } }
@@ -208,7 +208,7 @@ RSpec.describe 'Musics API', type: :request do
     end
 
     context 'when the request is all attributes' do
-      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true, user_id: user1.id } }
+      let(:music_minimal_attributes) { { **get_music, number_views: 1, feat: true } }
 
       it 'create music' do
         expect(json['title']).to eq(music_minimal_attributes[:title])

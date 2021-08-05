@@ -25,8 +25,13 @@ module ExceptionHandler extend ActiveSupport::Concern
     end
 
     rescue_from ActiveRecord::RecordNotUnique do |e|
-      json = JSON.parse(e.binds[1].to_json)
-      json_response({ message: "The #{json['value']} e-mail has already been registered!" }, :bad_request)
+      email = ''
+      if e.binds and e.binds.length > 1
+        email = JSON.parse(e.binds[1].to_json)['value']
+      else
+        email = e.sql.split(',')[5].strip.gsub("'", "")
+      end
+      json_response({ message: "The #{email} e-mail has already been registered!" }, :bad_request)
     end
 
     private

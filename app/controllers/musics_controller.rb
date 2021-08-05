@@ -16,7 +16,9 @@ class MusicsController < ApplicationController
   end
 
   def create
-    @music = Music.create!(music_params)
+    create_music_params = music_params
+    create_music_params[:user_id] = @current_user[:id]
+    @music = Music.create!(create_music_params)
     json_response(@music, :created)
   end
 
@@ -57,7 +59,7 @@ class MusicsController < ApplicationController
   private 
 
   def music_params
-    params.permit(:title, :artist, :release_date, :duration, :number_views, :feat, :user_id)
+    params.except(:music).permit(:title, :artist, :release_date, :duration, :number_views, :feat, :user_id)
   end
 
   def set_music

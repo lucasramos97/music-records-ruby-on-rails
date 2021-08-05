@@ -16,7 +16,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.permit(:username, :email, :password)
+    params.except(:user).permit(:username, :email, :password)
   end
 
   def verify_create
