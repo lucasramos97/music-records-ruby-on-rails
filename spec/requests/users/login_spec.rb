@@ -1,5 +1,7 @@
 require 'rails_helper'
 
+SECRET_KEY = Rails.application.secrets.secret_key_base
+
 RSpec.describe 'Login', type: :request do
   describe 'POST /login' do
     let!(:users) { create_list(:user, 1) }
@@ -21,6 +23,15 @@ RSpec.describe 'Login', type: :request do
         expect(json['email']).to eq(user1.email)
         expect(json['password']).to be_nil
         expect(response).to have_http_status(200)
+      end
+    end
+
+    context 'token lasts 24 hours' do
+      it 'login' do
+        
+        payload = JWT.decode(json['token'], SECRET_KEY, true, { algorithm: 'HS256' })[0]
+        
+        expect(payload['exp']).to eq(24.hours.from_now.to_i)
       end
     end
 
