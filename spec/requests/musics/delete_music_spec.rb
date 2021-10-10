@@ -33,11 +33,13 @@ RSpec.describe 'Delete Music', type: :request do
         )
 
         expect(json).to eq(db_music_json)
+        expect(match_date(json['release_date'])).to_not be_nil
+        expect(match_time(json['duration'])).to_not be_nil
         expect(json['deleted']).to be_nil
         expect(json['user']).to be_nil
         expect(db_music.deleted).to be_truthy
-        expect(json['created_at']).not_to be_nil
-        expect(json['updated_at']).not_to be_nil
+        expect(match_date_time(json['created_at'])).to_not be_nil
+        expect(match_date_time(json['updated_at'])).to_not be_nil
         expect(valid_created_at).to be_truthy
         expect(json['updated_at']).to eq(db_music_json['updated_at'])
         expect(json['updated_at']).not_to eq(music_json['updated_at'])

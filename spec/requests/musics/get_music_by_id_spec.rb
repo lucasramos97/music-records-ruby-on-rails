@@ -23,6 +23,12 @@ RSpec.describe 'Get Music By Id', type: :request do
         music_json = convert_music_to_json(music)
 
         expect(json).to eq(music_json)
+        expect(match_date(json['release_date'])).to_not be_nil
+        expect(match_time(json['duration'])).to_not be_nil
+        expect(json['deleted']).to be_nil
+        expect(json['user']).to be_nil
+        expect(match_date_time(json['created_at'])).to_not be_nil
+        expect(match_date_time(json['updated_at'])).to_not be_nil
         expect(response).to have_http_status(200)
       end
     end

@@ -75,14 +75,16 @@ RSpec.describe 'Post Music', type: :request do
 
         expect(valid_title).to be_truthy
         expect(valid_artist).to be_truthy
+        expect(match_date(json['release_date'])).to_not be_nil
         expect(valid_release_date).to be_truthy
+        expect(match_time(json['duration'])).to_not be_nil
         expect(valid_duration).to be_truthy
         expect(valid_number_views).to be_truthy
         expect(valid_feat).to be_truthy
         expect(json['deleted']).to be_nil
         expect(json['user']).to be_nil
-        expect(json['created_at']).to_not be_nil
-        expect(json['updated_at']).to_not be_nil
+        expect(match_date_time(json['created_at'])).to_not be_nil
+        expect(match_date_time(json['updated_at'])).to_not be_nil
         expect(json['created_at']).to eq(db_music_json['created_at'])
         expect(json['updated_at']).to eq(db_music_json['updated_at'])
         expect(json['created_at']).to eq(json['updated_at'])
@@ -136,14 +138,16 @@ RSpec.describe 'Post Music', type: :request do
 
         expect(valid_title).to be_truthy
         expect(valid_artist).to be_truthy
+        expect(match_date(json['release_date'])).to_not be_nil
         expect(valid_release_date).to be_truthy
+        expect(match_time(json['duration'])).to_not be_nil
         expect(valid_duration).to be_truthy
         expect(valid_number_views).to be_truthy
         expect(valid_feat).to be_truthy
         expect(json['deleted']).to be_nil
         expect(json['user']).to be_nil
-        expect(json['created_at']).to_not be_nil
-        expect(json['updated_at']).to_not be_nil
+        expect(match_date_time(json['created_at'])).to_not be_nil
+        expect(match_date_time(json['updated_at'])).to_not be_nil
         expect(json['created_at']).to eq(db_music_json['created_at'])
         expect(json['updated_at']).to eq(db_music_json['updated_at'])
         expect(json['created_at']).to eq(json['updated_at'])

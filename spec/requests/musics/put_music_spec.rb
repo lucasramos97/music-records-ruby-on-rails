@@ -92,8 +92,10 @@ RSpec.describe 'Put Music', type: :request do
         expect(json['title']).to_not eq(music_json['title'])
         expect(valid_artist).to be_truthy
         expect(json['artist']).to_not eq(music_json['artist'])
+        expect(match_date(json['release_date'])).to_not be_nil
         expect(valid_release_date).to be_truthy
         expect(json['release_date']).to_not eq(music_json['release_date'])
+        expect(match_time(json['duration'])).to_not be_nil
         expect(valid_duration).to be_truthy
         expect(json['duration']).to_not eq(music_json['duration'])
         expect(valid_number_views).to be_truthy
@@ -102,8 +104,8 @@ RSpec.describe 'Put Music', type: :request do
         expect(json['feat']).to_not eq(music_json['feat'])
         expect(json['deleted']).to be_nil
         expect(json['user']).to be_nil
-        expect(json['created_at']).to_not be_nil
-        expect(json['updated_at']).to_not be_nil
+        expect(match_date_time(json['created_at'])).to_not be_nil
+        expect(match_date_time(json['updated_at'])).to_not be_nil
         expect(valid_created_at).to be_truthy
         expect(json['updated_at']).to eq(db_music_json['updated_at'])
         expect(json['updated_at']).to_not eq(music_json['updated_at'])
@@ -168,16 +170,18 @@ RSpec.describe 'Put Music', type: :request do
         expect(json['title']).to_not eq(music_json['title'])
         expect(valid_artist).to be_truthy
         expect(json['artist']).to_not eq(music_json['artist'])
+        expect(match_date(json['release_date'])).to_not be_nil
         expect(valid_release_date).to be_truthy
         expect(json['release_date']).to_not eq(music_json['release_date'])
+        expect(match_time(json['duration'])).to_not be_nil
         expect(valid_duration).to be_truthy
         expect(json['duration']).to_not eq(music_json['duration'])
         expect(valid_number_views).to be_truthy
         expect(valid_feat).to be_truthy
         expect(json['deleted']).to be_nil
         expect(json['user']).to be_nil
-        expect(json['created_at']).to_not be_nil
-        expect(json['updated_at']).to_not be_nil
+        expect(match_date_time(json['created_at'])).to_not be_nil
+        expect(match_date_time(json['updated_at'])).to_not be_nil
         expect(valid_created_at).to be_truthy
         expect(json['updated_at']).to eq(db_music_json['updated_at'])
         expect(json['updated_at']).to_not eq(music_json['updated_at'])

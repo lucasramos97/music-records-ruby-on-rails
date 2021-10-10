@@ -39,4 +39,16 @@ module RequestSpecHelper
     content = user.to_json
     JSON.parse(content.gsub('password_digest', 'password'))
   end
+
+  def match_date(date)
+    /\d{4}-\d{2}-\d{2}/.match(date)
+  end
+
+  def match_time(time)
+    /\d{2}:\d{2}:\d{2}/.match(time)
+  end
+
+  def match_date_time(date_time)
+    /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3}/.match(date_time)
+  end
 end

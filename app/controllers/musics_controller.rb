@@ -106,7 +106,7 @@ class MusicsController < ApplicationController
       raise(ExceptionHandler::FieldError, Messages::WRONG_RELEASE_DATE_FORMAT)
     end
 
-    if music_params[:duration].match(/\d{2}:\d{2}:\d{2}/).nil?
+    if /\d{2}:\d{2}:\d{2}/.match(music_params[:duration]).nil?
       raise(ExceptionHandler::FieldError, Messages::WRONG_DURATION_FORMAT)
     end
   end
