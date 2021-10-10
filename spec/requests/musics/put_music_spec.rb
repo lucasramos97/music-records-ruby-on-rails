@@ -293,6 +293,34 @@ RSpec.describe 'Put Music', type: :request do
         expect(response).to have_http_status(400)
       end
     end
+
+    context 'put music with invalid release date' do
+      let(:music_params) {
+        { 
+          **minimal_attributes_music, 
+          release_date: '2021-01-32'
+        } 
+      }
+
+      it 'put music' do
+        expect(json['message']).to eq(Messages.get_invalid_date(music_params[:release_date]))
+        expect(response).to have_http_status(400)
+      end
+    end
+
+    context 'put music with invalid duration' do
+      let(:music_params) {
+        { 
+          **minimal_attributes_music, 
+          duration: '23:60:59'
+        } 
+      }
+
+      it 'put music' do
+        expect(json['message']).to eq(Messages.get_invalid_time(music_params[:duration]))
+        expect(response).to have_http_status(400)
+      end
+    end
     
     context 'put music with invalid token' do
       let(:header_user1) { { 'Authorization': 'Bearer 123' } }

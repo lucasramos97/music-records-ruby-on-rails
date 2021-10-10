@@ -25,6 +25,14 @@ class Messages
   INVALID_TOKEN = 'Invalid token!'
   TOKEN_EXPIRED = 'Log in again, your token has expired!'
 
+  def self.get_invalid_date(date)
+    "'#{date}' is not a valid date!"
+  end
+
+  def self.get_invalid_time(time)
+    "'#{time}' is not a valid time!"
+  end
+
   def self.get_email_already_registered(email)
     "The #{email} e-mail has already been registered!"
   end

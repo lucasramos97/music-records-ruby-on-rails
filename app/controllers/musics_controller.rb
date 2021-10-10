@@ -96,6 +96,10 @@ class MusicsController < ApplicationController
       raise(ExceptionHandler::FieldError, Messages::DURATION_IS_REQUIRED)
     end
 
+    if /\d{4}-\d{2}-\d{2}/.match(music_params[:release_date]).nil?
+      raise(ExceptionHandler::FieldError, Messages::WRONG_RELEASE_DATE_FORMAT)
+    end
+
     begin
 
       release_date = Date.strptime(music_params[:release_date], '%Y-%m-%d')
@@ -103,11 +107,18 @@ class MusicsController < ApplicationController
         raise(ExceptionHandler::FieldError, Messages::RELEASE_DATE_CANNOT_BE_FUTURE)
       end
     rescue Date::Error
-      raise(ExceptionHandler::FieldError, Messages::WRONG_RELEASE_DATE_FORMAT)
+      raise(ExceptionHandler::FieldError, Messages.get_invalid_date(music_params[:release_date]))
     end
 
     if /\d{2}:\d{2}:\d{2}/.match(music_params[:duration]).nil?
       raise(ExceptionHandler::FieldError, Messages::WRONG_DURATION_FORMAT)
+    end
+
+    begin
+
+      Time.strptime(music_params[:duration], '%H:%M:%S')
+    rescue ArgumentError
+      raise(ExceptionHandler::FieldError, Messages.get_invalid_time(music_params[:duration]))
     end
   end
 
