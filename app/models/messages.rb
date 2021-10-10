@@ -23,6 +23,7 @@ class Messages
   NO_BEARER_AUTHENTICATION_SCHEME = 'No Bearer HTTP authentication scheme!'
   NO_TOKEN_PROVIDED = 'No token provided!'
   INVALID_TOKEN = 'Invalid token!'
+  TOKEN_EXPIRED = 'Log in again, your token has expired!'
 
   def self.get_email_already_registered(email)
     "The #{email} e-mail has already been registered!"

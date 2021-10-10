@@ -9,6 +9,7 @@ RSpec.describe 'Get Music By Id', type: :request do
   let!(:header_user1) { { 'Authorization': "Bearer #{token_user1}" } }
   let!(:header_user2) { { 'Authorization': "Bearer #{token_user2}" } }
   let!(:no_bearer_header) { { 'Authorization': "Token #{token_user1}" } }
+  let!(:expired_token_header) { generate_expired_token(user1.id) }
   let!(:music) { create(:music, user: user1) }
   let!(:music_id) { music.id }
   let!(:deleted_music) { create(:music, deleted: true, user: user1) }
@@ -94,6 +95,15 @@ RSpec.describe 'Get Music By Id', type: :request do
   
       it 'get music by id' do
         expect(json['message']).to eq(Messages::NO_BEARER_AUTHENTICATION_SCHEME)
+        expect(response).to have_http_status(401)
+      end
+    end
+
+    context 'get music by id with expired token' do
+      let(:header_user1) { expired_token_header }
+  
+      it 'get music by id' do
+        expect(json['message']).to eq(Messages::TOKEN_EXPIRED)
         expect(response).to have_http_status(401)
       end
     end

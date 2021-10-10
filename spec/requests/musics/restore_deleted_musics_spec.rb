@@ -9,6 +9,7 @@ RSpec.describe 'Restore Deleted Musics', type: :request do
   let!(:header_user1) { { 'Authorization': "Bearer #{token_user1}" } }
   let!(:header_user2) { { 'Authorization': "Bearer #{token_user2}" } }
   let!(:no_bearer_header) { { 'Authorization': "Token_user1 #{token_user1}" } }
+  let!(:expired_token_header) { generate_expired_token(user1.id) }
 
   describe 'POST musics/deleted/restore' do
     let!(:deleted_musics) { create_list(:music, 10, deleted: true, user: user1) }
@@ -139,6 +140,15 @@ RSpec.describe 'Restore Deleted Musics', type: :request do
   
       it 'restore deleted musics' do
         expect(json['message']).to eq(Messages::NO_BEARER_AUTHENTICATION_SCHEME)
+        expect(response).to have_http_status(401)
+      end
+    end
+
+    context 'restore deleted musics with expired token' do
+      let(:header_user1) { expired_token_header }
+  
+      it 'restore deleted musics' do
+        expect(json['message']).to eq(Messages::TOKEN_EXPIRED)
         expect(response).to have_http_status(401)
       end
     end

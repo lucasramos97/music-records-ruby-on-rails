@@ -18,7 +18,7 @@ class MusicsController < ApplicationController
 
   def create
     create_music_params = music_params
-    create_music_params[:user_id] = @current_user[:id]
+    create_music_params[:user] = @current_user
     @music = Music.create!(create_music_params)
     json_response(@music, :created)
   end
@@ -34,17 +34,17 @@ class MusicsController < ApplicationController
   end
 
   def count_deleted_musics
-    json_response(Music.where(deleted: true, user_id: @current_user[:id]).count)
+    json_response(Music.where(deleted: true, user: @current_user).count)
   end
 
   def index_deleted_musics
-    @musics = Music.where(deleted: true, user_id: @current_user[:id]).order(artist: :asc, title: :asc).page(page).per(size)
+    @musics = Music.where(deleted: true, user: @current_user).order(artist: :asc, title: :asc).page(page).per(size)
     json_response(paged_musics(@musics))
   end
 
   def restore_deleted_musics
     ids = params[:_json].map { |m| m[:id] }
-    result = Music.where(id: ids, deleted: true, user_id: @current_user[:id])
+    result = Music.where(id: ids, deleted: true, user: @current_user)
                   .update_all(deleted: false)
     json_response(result)
   end
@@ -55,7 +55,7 @@ class MusicsController < ApplicationController
   end
 
   def empty_list
-    result = Music.where(deleted: true, user_id: @current_user[:id]).destroy_all
+    result = Music.where(deleted: true, user: @current_user).destroy_all
     json_response(result.length)
   end
 
@@ -66,7 +66,7 @@ class MusicsController < ApplicationController
   end
 
   def set_music
-    @music = Music.find_by(id: params[:id], user_id: @current_user[:id])
+    @music = Music.find_by(id: params[:id], user: @current_user)
     if not @music
       raise ActiveRecord::RecordNotFound.new(message = nil, model = nil, primary_key = nil, id = nil)
     end

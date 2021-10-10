@@ -8,6 +8,11 @@ module RequestSpecHelper
     JsonWebToken.encode(user_id: user_id)
   end
 
+  def generate_expired_token(user_id)
+    token = JsonWebToken.encode({ user_id: user_id }, (Time.now.to_i - 10))
+    { 'Authorization': "Bearer #{token}" }
+  end
+
   def all_equals(object, *search_objects)
 
     if object.nil?
