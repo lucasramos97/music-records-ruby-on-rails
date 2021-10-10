@@ -1,4 +1,5 @@
 class AuthenticateUser
+  
   def initialize(email, password)
     @email = email
     @password = password
@@ -22,11 +23,13 @@ class AuthenticateUser
     user = User.find_by(email: email)
     
     if not user
-      raise(ExceptionHandler::AuthenticationError, "User not found by e-mail: #{email}!")
+      message = Messages.get_user_not_found_by_email(email)
+      raise(ExceptionHandler::AuthenticationError, message)
     end
     
     if not user.authenticate(password)
-      raise(ExceptionHandler::AuthenticationError, 'Password invalid!')
+      message = Messages.get_password_does_not_match_with_email(email)
+      raise(ExceptionHandler::AuthenticationError, message)
     end
 
     return user

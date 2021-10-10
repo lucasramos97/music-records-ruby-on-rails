@@ -3,11 +3,12 @@ class MusicsController < ApplicationController
 
   before_action :set_music, only: [:show, :update, :destroy, :definitive_delete_music]
   before_action :verify_deleted_music, only: [:show, :update, :destroy]
-  before_action :verify_not_deleted_music, only: :definitive_delete_music
+  before_action :verify_music_fields, only: [:create, :update]
   before_action :verify_restore_deleted_musics, only: :restore_deleted_musics
+  before_action :verify_not_deleted_music, only: :definitive_delete_music
   
   def index
-    @musics = Music.where(deleted: false, user_id: @current_user[:id]).order(artist: :asc, title: :asc).page(page).per(size)
+    @musics = Music.where(deleted: false, user: @current_user).order(artist: :asc, title: :asc).page(page).per(size)
     json_response(paged_musics(@musics))
   end
 
@@ -43,12 +44,9 @@ class MusicsController < ApplicationController
 
   def restore_deleted_musics
     ids = params[:_json].map { |m| m[:id] }
-    json_response(Music.where(id: ids, user_id: @current_user[:id]).update_all(deleted: false))
-  end
-
-  def empty_list
-    Music.where(deleted: true, user_id: @current_user[:id]).destroy_all
-    json_response
+    result = Music.where(id: ids, deleted: true, user_id: @current_user[:id])
+                  .update_all(deleted: false)
+    json_response(result)
   end
 
   def definitive_delete_music
@@ -56,14 +54,19 @@ class MusicsController < ApplicationController
     json_response
   end
 
+  def empty_list
+    result = Music.where(deleted: true, user_id: @current_user[:id]).destroy_all
+    json_response(result.length)
+  end
+
   private 
 
   def music_params
-    params.except(:music).permit(:title, :artist, :release_date, :duration, :number_views, :feat, :user_id)
+    params.permit(:title, :artist, :release_date, :duration, :number_views, :feat)
   end
 
   def set_music
-    @music = Music.where(id: params[:id], user_id: @current_user[:id]).first
+    @music = Music.find_by(id: params[:id], user_id: @current_user[:id])
     if not @music
       raise ActiveRecord::RecordNotFound.new(message = nil, model = nil, primary_key = nil, id = nil)
     end
@@ -75,11 +78,44 @@ class MusicsController < ApplicationController
     end
   end
 
+  def verify_music_fields
+
+    if music_params[:title].blank?
+      raise(ExceptionHandler::FieldError, Messages::TITLE_IS_REQUIRED)
+    end
+
+    if music_params[:artist].blank?
+      raise(ExceptionHandler::FieldError, Messages::ARTIST_IS_REQUIRED)
+    end
+
+    if music_params[:release_date].blank?
+      raise(ExceptionHandler::FieldError, Messages::RELEASE_DATE_IS_REQUIRED)
+    end
+
+    if music_params[:duration].blank?
+      raise(ExceptionHandler::FieldError, Messages::DURATION_IS_REQUIRED)
+    end
+
+    begin
+
+      release_date = Date.strptime(music_params[:release_date], '%Y-%m-%d')
+      if release_date > Date.today
+        raise(ExceptionHandler::FieldError, Messages::RELEASE_DATE_CANNOT_BE_FUTURE)
+      end
+    rescue Date::Error
+      raise(ExceptionHandler::FieldError, Messages::WRONG_RELEASE_DATE_FORMAT)
+    end
+
+    if music_params[:duration].match(/\d{2}:\d{2}:\d{2}/).nil?
+      raise(ExceptionHandler::FieldError, Messages::WRONG_DURATION_FORMAT)
+    end
+  end
+
   def verify_restore_deleted_musics
     params.require(:_json)
     params[:_json].each do |m|
       if not m.has_key?(:id)
-        raise ActionController::ParameterMissing.new(:id)
+        raise(ExceptionHandler::FieldError, Messages::ID_IS_REQUIRED)
       end
     end
   end
@@ -89,5 +125,4 @@ class MusicsController < ApplicationController
       raise ActiveRecord::RecordNotFound.new(message = nil, model = nil, primary_key = nil, id = nil)
     end
   end
-
 end

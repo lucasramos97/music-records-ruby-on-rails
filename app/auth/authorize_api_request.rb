@@ -24,17 +24,17 @@ class AuthorizeApiRequest
   def http_auth_header
 
     authorization = headers['Authorization']
-    if not authorization
-      raise(ExceptionHandler::AuthenticationError, 'Header Authorization not present!')
+    if authorization.blank?
+      raise(ExceptionHandler::AuthenticationError, Messages::HEADER_AUTHORIZATION_NOT_PRESENT)
     end
 
     if not authorization.start_with?('Bearer ')
-      raise(ExceptionHandler::AuthenticationError, 'No Bearer HTTP authentication scheme!')
+      raise(ExceptionHandler::AuthenticationError, Messages::NO_BEARER_AUTHENTICATION_SCHEME)
     end
 
     token = authorization.split('Bearer ').last
     if not token
-      raise(ExceptionHandler::AuthenticationError, 'No token provided!')
+      raise(ExceptionHandler::AuthenticationError, Messages::NO_TOKEN_PROVIDED)
     end
 
     return token
