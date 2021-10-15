@@ -35,8 +35,8 @@ RSpec.describe 'Create User', type: :request do
         expect(valid_email).to be_truthy
         expect(db_user_json['password']).to_not eq(all_attributes_user['password'])
         expect(json['password']).to eq(db_user_json['password'])
-        expect(json['created_at']).to_not be_nil
-        expect(json['updated_at']).to_not be_nil
+        expect(match_date_time(json['created_at'])).to_not be_nil
+        expect(match_date_time(json['updated_at'])).to_not be_nil
         expect(json['created_at']).to eq(db_user_json['created_at'])
         expect(json['updated_at']).to eq(db_user_json['updated_at'])
         expect(json['created_at']).to eq(json['updated_at'])
