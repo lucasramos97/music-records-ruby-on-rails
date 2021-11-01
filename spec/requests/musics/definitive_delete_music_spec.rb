@@ -24,6 +24,7 @@ RSpec.describe 'Definitive Delete Music', type: :request do
         db_music = Music.find_by(id: deleted_music_id, user: user1)
 
         expect(db_music).to be_nil
+        expect(response.body).to be_blank
         expect(response).to have_http_status(200)
       end
     end
