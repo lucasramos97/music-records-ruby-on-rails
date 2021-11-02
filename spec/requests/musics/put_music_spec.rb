@@ -102,6 +102,7 @@ RSpec.describe 'Put Music', type: :request do
         expect(json['number_views']).to_not eq(music_json['number_views'])
         expect(valid_feat).to be_truthy
         expect(json['feat']).to_not eq(music_json['feat'])
+        expect(db_music.deleted).to be_falsey
         expect(json['deleted']).to be_nil
         expect(json['user']).to be_nil
         expect(match_date_time(json['created_at'])).to_not be_nil
@@ -178,6 +179,7 @@ RSpec.describe 'Put Music', type: :request do
         expect(json['duration']).to_not eq(music_json['duration'])
         expect(valid_number_views).to be_truthy
         expect(valid_feat).to be_truthy
+        expect(db_music.deleted).to be_falsey
         expect(json['deleted']).to be_nil
         expect(json['user']).to be_nil
         expect(match_date_time(json['created_at'])).to_not be_nil
