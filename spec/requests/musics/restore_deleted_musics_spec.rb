@@ -57,19 +57,11 @@ RSpec.describe 'Restore Deleted Musics', type: :request do
       it 'restore deleted musics' do
 
         db_musics_user1 = Music.where(user: user1)
-        contain_not_deleted = false
-        db_musics_user1.each do |m|
-          if not m.deleted
-            contain_not_deleted = true
-            break
-          end
-        end
-
         count_deleted_musics_user2 = Music.where(deleted: true, user: user2).count
 
         expect(json).to eq(0)
         expect(db_musics_user1.length).to eq(11)
-        expect(contain_not_deleted).to be_truthy
+        expect(db_musics_user1.any? { |m| not m.deleted }).to be_truthy
         expect(count_deleted_musics_user2).to eq(10)
         expect(response).to have_http_status(200)
       end
