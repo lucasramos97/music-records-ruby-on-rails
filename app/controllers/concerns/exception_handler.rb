@@ -15,16 +15,5 @@ module ExceptionHandler extend ActiveSupport::Concern
     rescue_from ExceptionHandler::AuthenticationError do |e|
       json_response({ message: e.message }, :unauthorized)
     end
-
-    rescue_from ActiveRecord::RecordNotUnique do |e|
-      email = ''
-      if e.binds and e.binds.length > 1
-        email = JSON.parse(e.binds[1].to_json)['value']
-      else
-        email = e.sql.split(',')[5].strip.gsub("'", "")
-      end
-      message = Messages.get_email_already_registered(email)
-      json_response({ message: message }, :bad_request)
-    end
   end
 end

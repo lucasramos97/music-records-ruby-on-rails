@@ -4,6 +4,12 @@ class UsersController < ApplicationController
   before_action :verify_login_fields, only: [:login]
 
   def create
+
+    if User.exists?(email: user_params[:email])
+      message = Messages.get_email_already_registered(user_params[:email])
+      return json_response({ message: message }, :bad_request)
+    end
+
     @db_user = User.create!(user_params)
     user = {
       id: @db_user.id,

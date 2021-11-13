@@ -45,7 +45,7 @@ class MusicsController < ApplicationController
   def restore_deleted_musics
     ids = params[:_json].map { |m| m[:id] }
     result = Music.where(id: ids, deleted: true, user: @current_user)
-                  .update_all(deleted: false)
+                  .update_all(deleted: false, updated_at: DateTime.current())
     json_response(result)
   end
 
